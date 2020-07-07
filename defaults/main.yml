@@ -1,0 +1,8 @@
+---
+VAR_Nginx_tmpDir: /tmp
+VAR_Nginx_extracting_rolename:
+  - Nginx_Install
+  - Nginx_Setup
+  - Nginx_OSSetup
+VAR_Nginx_gathering_dest: '{{ playbook_dir }}/_gathered_data'
+VAR_Nginx_extracting_dest: '{{ playbook_dir }}/_parameters'

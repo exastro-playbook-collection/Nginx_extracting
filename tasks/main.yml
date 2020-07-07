@@ -1,0 +1,28 @@
+---
+  - name: check param VAR_Nginx_extracting_rolename is none
+    fail:
+      msg: "Parameter VAR_Nginx_extracting_rolename cannot be NULL."
+    when: "(VAR_Nginx_extracting_rolename is none) or (VAR_Nginx_extracting_rolename == '')"
+
+  - name: check param VAR_Nginx_gathering_dest
+    fail:
+      msg: "Parameter VAR_Nginx_gathering_dest cannot be NULL."
+    when: "(VAR_Nginx_gathering_dest is none) or (VAR_Nginx_gathering_dest == '')"
+
+  - name: check param VAR_Nginx_extracting_dest
+    fail:
+      msg: "Parameter VAR_Nginx_extracting_dest cannot be NULL."
+    when: "(VAR_Nginx_extracting_dest is none) or (VAR_Nginx_extracting_dest == '')"
+
+  - name: Remove old data
+    file:
+      path: "{{ VAR_Nginx_extracting_dest }}/{{ inventory_hostname }}/Nginx_extracting"
+      state: absent
+    delegate_to: localhost
+    become: no
+
+  - name: Execute Nginx's parameter_generate
+    include_tasks: extract.yml
+    with_items: "{{ VAR_Nginx_extracting_rolename }}"
+    loop_control:
+      loop_var: outer_item

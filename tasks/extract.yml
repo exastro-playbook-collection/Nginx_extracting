@@ -1,0 +1,37 @@
+---
+- name: check param VAR_Nginx_extracting_rolename subElement
+  stat:
+    path: "{{ VAR_Nginx_gathering_dest }}/{{ inventory_hostname }}/Nginx_gathering"
+  delegate_to: localhost
+  become: no
+  register: file_exist
+
+- name: parameter_generate run
+  block:
+  # 1-01  Nginx Install Roleのパラメータ生成
+    - name: Execute the parameter_generate module for Nginx_Install
+      parameter_generate:
+        rolename: "{{ outer_item }}"
+        collect_root: "{{ VAR_Nginx_gathering_dest }}/{{ inventory_hostname }}/Nginx_gathering"
+        dest: "{{ VAR_Nginx_extracting_dest }}"
+        specific: "python {{ role_path }}/files/Nginx_install.py"
+      when: outer_item == "Nginx_Install"
+
+  # 1-02　Nginx設定Roleのパラメータ生成
+    - name: Execute the parameter_generate module for Nginx_Setup
+      parameter_generate:
+        rolename: "{{ outer_item }}"
+        collect_root: "{{ VAR_Nginx_gathering_dest }}/{{ inventory_hostname }}/Nginx_gathering"
+        dest: "{{ VAR_Nginx_extracting_dest }}"
+        specific: "python {{ role_path }}/files/Nginx_setup.py {{ VAR_Nginx_gathering_dest }}/{{ inventory_hostname }}/Nginx_gathering/nginx.json {{ VAR_Nginx_tmpDir }}/Nginx_Setup/{{ inventory_hostname }}/conf_root"
+      when: outer_item == "Nginx_Setup"
+
+  # 1-03　OSセットアップ--Nginxサービス自動起動Roleのパラメータ生成
+    - name: Execute the parameter_generate module for Nginx_OSSetup
+      parameter_generate:
+        rolename: "{{ outer_item }}"
+        collect_root: "{{ VAR_Nginx_gathering_dest }}/{{ inventory_hostname }}/Nginx_gathering"
+        dest: "{{ VAR_Nginx_extracting_dest }}"
+        specific: "python {{ role_path }}/files/Nginx_ossetup.py {{ VAR_Nginx_gathering_dest }}/{{ inventory_hostname }}/Nginx_gathering/nginxState.txt"
+      when: outer_item == "Nginx_OSSetup"
+  when: file_exist.stat.exists != false
